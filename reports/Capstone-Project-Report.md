@@ -73,15 +73,18 @@ root
 ![image-1](https://user-images.githubusercontent.com/28558875/82366012-b80f9b80-9a3b-11ea-9280-30fd6a29a20b.png)
 
 2. A comparison of the level of churned users (free vs. paid)
+
 From the chart, we can see that churned users played less number of songs per sessions compared to normal users.
 ![image-2](https://user-images.githubusercontent.com/28558875/82366034-c1990380-9a3b-11ea-83fa-5ee7fb077ce9.png)
 
 
 3. A gender distribution for number of songs played per session for churned and regular users
+
 From the chart, we can see that churned users played less number of songs per sessions compared to normal users.
 ![image-3](https://user-images.githubusercontent.com/28558875/82366063-ccec2f00-9a3b-11ea-8402-90c35e4e73c6.png)
 
 4. A gender distribution for total operations per session between churned and regular users
+
 From the chart, we can see that churn users performed less compared to normal users. And, femla users are more likely to churn.
 ![image-4](https://user-images.githubusercontent.com/28558875/82366080-d37aa680-9a3b-11ea-95b6-b39ec2929695.png)
 
