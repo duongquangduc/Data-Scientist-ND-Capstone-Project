@@ -6,8 +6,8 @@ May 2020
 ## Proposal
 
 ### Domain Background
-Churn Prediction is a polular problem facing in many businesses. It minimizes customer defection by predicting which customers are likely to cancel
-a subcription to a service. Though originally used within the telecommunications industry, it has become common practicess across many businesses such as
+Churn Prediction is a popular problem facing in many businesses. It minimizes customer defection by predicting which customers are likely to cancel
+a subscription to a service. Though originally used within the telecommunications industry, it has become common practices across many businesses such as
 banks, insurance firm, and other verticals.
 
 The Prediction process is heavily data driven and often utilizes advanced machine learning techniques. In this project, we will build a prediction 

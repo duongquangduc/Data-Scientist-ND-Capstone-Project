@@ -21,7 +21,7 @@ banks, insurance firm, and other verticals.
 ### Metrics
 I will use the two main metrics to evaluate the model in this project: F-1 Score and Accuracy.
 + F-1 score (also F-score or F-measure) is a measure of a test's accuracy. It considers both the precision *p* and recall *r* of the test to compute the score.
-The traiditional F-measure or balanced F-score is the harmonic mean of precision and recall.
+The traditional F-measure or balanced F-score is the harmonic mean of precision and recall.
 F-1 = 2 x (precision x recall) / (precision + recall)
 
 + Accuracy is a common metric for binary classifiers; it takes into account both true positives and true negatives with equal weight.
