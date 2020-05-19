@@ -14,7 +14,7 @@ The Prediction process is heavily data driven and often utilizes advanced machin
 model to predict churn users with Spark and its machine learning frameworks. 
 
 ### Problem Statement
-The churn action is defined as the cancellation of a user account. Based on the large dataset Sparkify, we need to build a model to predict which users
+The churn action is defined as the cancellation of a user account. Based on the large dataset Sparkify, we will build a model to predict which users
 are likely to cancel the subscription of the service.
 
 

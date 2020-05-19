@@ -11,43 +11,39 @@ This is the repository for project Data Scientist Capstone Project, a part of th
 6. [References](#References)
 
 ## 1. Project Overview <a name="ProjectOverview"></a> 
-Churn Prediction is a popular problem of today business. Churn determines the clients who are going to leave the service by cancelling their subscriptions or stopping paying for the services.
-By leveraging advanced data analytics techniques like Machine Learning (ML), we can be able to acticipate potential churners.
-
-In this project, I'm going to use Apache Spark (PySpark dataframe) instead of Pandas dataframe as the analytics engine for several reasons:
-1. Apache Spark is a big data engine so it can handle to case of big data set (dataset that is over the size of a single node computation).
-2. tbd
-3. tbd
+This is the capstone project of the Data Scientist Nanodegree Program in Udacity. The goal of the project is to analyze and build a predictive model
+of churn users for music application Sparkify. There are many users accessing the application everyday. They could use either free-trial or the premium
+subscription plan. They can upgrade, downgrade or cancel their subscription of the service at any time. In this project, we will explore a way to predict
+churn users with Apache Spark Machine Learning frameworks.
 
 
 ## 2. Installation <a name="Installation"></a>
-//to be defined
+The project is run in Apache Spark environment.
   
 ## 3. Project Components <a name="ProjectComponents"></a> 
-//to be defined
+- Sparkify.ipynb
+- README.md
 
 ## 4. Results <a name="Results"></a> 
 Refer to the result of this project in this post {link to Medium post}
 
 ## 5. Files <a name="Files"></a>
 <pre>
-- datasource
-|- //dataset
-- repository
-|- python file
-|- python file
-|- python file
-|- python file
-- models
-|- 
-- sample_report
-|- 
+- datasources
+- images
+|- image-1
+|- image-2
+|- image-3
+|- image-4
 - reports
 |- Capstone-Project-Proposal.md
-|- Capstone-Projet-Report.md
+|- Capstone-Project-Report.md
+- repository
+|- Sparkify.ipynb
+|- Sparkify.html
 - README.md
 </pre>
 
 ## 6. References <a name="References"></a>
 1. [Apache Spark](https://spark.apache.org/docs/latest/api/python/pyspark.sql.html)
-2. The Data Scientist Guide to Apache Spark
+2. The Data Scientist Guide to Apache Spark, Databricks
