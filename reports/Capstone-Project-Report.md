@@ -175,7 +175,7 @@ The steps in this phase include:
 
 ## IV. Results
 The final model reaches F-1 score of 0.8 and accuracy of 78.09 %.
-The result of the this project is presented in this post [Building an End-to-end Churn Prediction Model with Apache Spark Machine Learning]().
+The result of the this project is presented in this post [Building Churn Prediction Model with Apache Spark Machine Learning]().
 
 ## V. Conclusion
 In this project, I have successfully applied Apache Spark Machine Learning framework to build a Churn Prediction Model.

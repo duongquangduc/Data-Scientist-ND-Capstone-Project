@@ -25,7 +25,7 @@ The project is run in Apache Spark environment.
 - README.md
 
 ## 4. Results <a name="Results"></a>
-The result of the this project is presented in this post [Building an End-to-end Churn Prediction Model with Apache Spark Machine Learning](). 
+The result of the this project is presented in this post [Building Churn Prediction Model with Apache Spark Machine Learning](). 
 
 ## 5. Files <a name="Files"></a>
 <pre>
