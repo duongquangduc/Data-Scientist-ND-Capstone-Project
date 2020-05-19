@@ -29,11 +29,11 @@ accuracy = (true_positive + true_negatives)/dataset_size
 
 
 ## II. Analysis
-_(approx. 2-4 pages)_
 
 ### Data Exploration
 The dataset has 286,500 records and each record has 18 attributes. Refer to the schema of the original dataset as below.
 
+<pre>
 root
  |-- artist: string (nullable = true)
  |-- auth: string (nullable = true)
@@ -55,10 +55,11 @@ root
  |-- userId: string (nullable = true)
  |-- datetime_ts: string (nullable = true)
  |-- datetime_ts_registration: string (nullable = true)
-
+</pre>
 
 ### Exploratory Visualization
 1. Gender distribution between churn users and regular users. Refer to the figure as below.
+<pre>
 +--------+------+-----+
 |is_churn|gender|count|
 +--------+------+-----+
@@ -68,6 +69,7 @@ root
 |       1|     F|   20|
 |       1|     M|   32|
 +--------+------+-----+
+</pre>
 <image-1>
 
 2. A comparison of the level of churned users (free vs. paid)
@@ -112,6 +114,7 @@ I applied Data Cleaning, Data Transformation, and Feature Engineering steps for 
 + Derive new columns: is_downgrade, is_churn
 
 After data transformation step, the schema of the dataset looks like this:
+<pre>
 root
  |-- artist: string (nullable = true)
  |-- auth: string (nullable = true)
@@ -133,11 +136,13 @@ root
  |-- userId: string (nullable = true)
  |-- datetime_ts: string (nullable = true)
  |-- datetime_ts_registration: string (nullable = true)
+ </pre>
 
 #### Feature Engineering
 + Define 9 features from feature 1 to 9 which could be used for the next phase.
 
 Here is the schema of the features set:
+<pre>
 root
  |-- total_songs: long (nullable = false)
  |-- total_thumbs_up: long (nullable = false)
@@ -149,7 +154,7 @@ root
  |-- avg_played_songs: double (nullable = true)
  |-- total_artist_listened: long (nullable = false)
  |-- is_churn: integer (nullable = true)
-
+</pre>
 
 
 ### Data Modeling

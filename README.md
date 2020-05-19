@@ -24,7 +24,8 @@ The project is run in Apache Spark environment.
 - Sparkify.ipynb
 - README.md
 
-## 4. Results <a name="Results"></a> 
+## 4. Results <a name="Results"></a>
+The result of the this project is presented in this post [Building an End-to-end Churn Prediction Model with Apache Spark Machine Learning](). 
 Refer to the result of this project in this post {link to Medium post}
 
 ## 5. Files <a name="Files"></a>
