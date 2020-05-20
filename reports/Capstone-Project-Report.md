@@ -160,20 +160,21 @@ root
 </pre>
 
 
-### 3. Training Models
+### 3. Data Modeling
 The steps in this phase include:
 + Vectorize all the features
-+ Standardize all input features
++ Standarize all input features
 + Split the dataset into train and validation sets
 + Train the model with different classifiers: Random Forest, SVM and Gradient Boosted Trees
 
 Refer to the jupyter notebook for details.
 
-### 4. Model Tuning and Evaluation
-+ The steps performed in this phase including:
+### 3. Model Evaluation & Fine Tuning
+The steps in this phase include:
 + Evaluate the model with each classifier by F-1 score and Accuracy. Select the model with highest result.
 + Fine tune the selected model by using Grid Search
 + Evaluate the final one more time.
+
 
 ## IV. Results
 The final model reaches F-1 score of 0.8 and accuracy of 78.09 %.
