@@ -13146,7 +13146,7 @@ div#notebook {
 <div class="prompt input_prompt">In&nbsp;[1]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># import common libraries for data wrangling</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># import common libraries for data transformation with pyspark</span>
 <span class="kn">from</span> <span class="nn">pyspark</span> <span class="k">import</span> <span class="n">SparkConf</span>
 <span class="kn">from</span> <span class="nn">pyspark.sql</span> <span class="k">import</span> <span class="n">SparkSession</span>
 <span class="kn">import</span> <span class="nn">pyspark.sql.functions</span> <span class="k">as</span> <span class="nn">F</span>
@@ -13156,9 +13156,9 @@ div#notebook {
 <span class="kn">from</span> <span class="nn">pyspark.sql</span> <span class="k">import</span> <span class="n">Window</span>
 <span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
 
-<span class="c1"># import pyspark.ml package </span>
+<span class="c1"># import pyspark.ml package for building machine learning model</span>
 <span class="kn">from</span> <span class="nn">pyspark.ml</span> <span class="k">import</span> <span class="n">pipeline</span>
-<span class="kn">from</span> <span class="nn">pyspark.ml.evaluation</span> <span class="k">import</span> <span class="n">MulticlassClassificationEvaluator</span>
+<span class="kn">from</span> <span class="nn">pyspark.ml.evaluation</span> <span class="k">import</span> <span class="n">BinaryClassificationEvaluator</span><span class="p">,</span> <span class="n">MulticlassClassificationEvaluator</span>
 <span class="kn">from</span> <span class="nn">pyspark.ml.regression</span> <span class="k">import</span> <span class="n">LinearRegression</span>
 <span class="kn">from</span> <span class="nn">pyspark.ml.classification</span> <span class="k">import</span> <span class="n">LinearSVC</span><span class="p">,</span> <span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="n">GBTClassifier</span>
 <span class="kn">from</span> <span class="nn">pyspark.ml.tuning</span> <span class="k">import</span> <span class="n">CrossValidator</span><span class="p">,</span> <span class="n">ParamGridBuilder</span>
@@ -13279,12 +13279,22 @@ only showing top 1 row
 </div>
 
 </div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Exploratory-Data-Analysis">Exploratory Data Analysis<a class="anchor-link" href="#Exploratory-Data-Analysis">&#182;</a></h1><p>When you're working with the full dataset, perform EDA by loading a small subset of the data and doing basic manipulations within Spark. In this workspace, you are already provided a small subset of data you can explore.</p>
+<h3 id="Define-Churn">Define Churn<a class="anchor-link" href="#Define-Churn">&#182;</a></h3><p>Once you've done some preliminary analysis, create a column <code>Churn</code> to use as the label for your model. I suggest using the <code>Cancellation Confirmation</code> events to define your churn, which happen for both paid and free users. As a bonus task, you can also look into the <code>Downgrade</code> events.</p>
+<h3 id="Explore-Data">Explore Data<a class="anchor-link" href="#Explore-Data">&#182;</a></h3><p>Once you've defined churn, perform some exploratory data analysis to observe the behavior for users who stayed vs users who churned. You can start by exploring aggregates on these two groups of users, observing how much of a specific action they experienced per a certain time unit or number of songs played.</p>
+
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">spark_df</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">len</span><span class="p">(</span><span class="n">spark_df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -13297,22 +13307,15 @@ only showing top 1 row
 
 <div class="output_area">
 
-    <div class="prompt"></div>
+    <div class="prompt output_prompt">Out[6]:</div>
 
 
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>+-------+------------------+----------+---------+------+------------------+--------+-----------------+------+-----------------+------+-------+--------------------+-----------------+--------------------+------------------+--------------------+--------------------+-----------------+
-|summary|            artist|      auth|firstName|gender|     itemInSession|lastName|           length| level|         location|method|   page|        registration|        sessionId|                song|            status|                  ts|           userAgent|           userId|
-+-------+------------------+----------+---------+------+------------------+--------+-----------------+------+-----------------+------+-------+--------------------+-----------------+--------------------+------------------+--------------------+--------------------+-----------------+
-|  count|            228108|    286500|   278154|278154|            286500|  278154|           228108|286500|           278154|286500| 286500|              278154|           286500|              228108|            286500|              286500|              278154|           286500|
-|   mean| 551.0852017937219|      null|     null|  null|114.41421291448516|    null|249.1171819778458|  null|             null|  null|   null|1.535358834084427...|1041.526554973822|            Infinity|210.05459685863875|1.540956889810483...|                null|59682.02278593872|
-| stddev|1217.7693079161374|      null|     null|  null|129.76726201140994|    null|99.23517921058361|  null|             null|  null|   null| 3.291321616327586E9|726.7762634630741|                 NaN| 31.50507848842214|1.5075439608226302E9|                null|109091.9499991047|
-|    min|               !!!| Cancelled| Adelaida|     F|                 0|   Adams|          0.78322|  free|       Albany, OR|   GET|  About|       1521380675000|                1|ÃÂg ÃÂtti Gr...|               200|       1538352117000|&#34;Mozilla/5.0 (Mac...|                 |
-|    max| ÃÂlafur Arnalds|Logged Out|   Zyonna|     M|              1321|  Wright|       3024.66567|  paid|Winston-Salem, NC|   PUT|Upgrade|       1543247354000|             2474|ÃÂau hafa slopp...|               404|       1543799476000|Mozilla/5.0 (comp...|               99|
-+-------+------------------+----------+---------+------+------------------+--------+-----------------+------+-----------------+------+-------+--------------------+-----------------+--------------------+------------------+--------------------+--------------------+-----------------+
 
-</pre>
+
+<div class="output_text output_subarea output_execute_result">
+<pre>18</pre>
 </div>
+
 </div>
 
 </div>
@@ -13324,7 +13327,7 @@ only showing top 1 row
 <div class="prompt input_prompt">In&nbsp;[7]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">spark_df</span><span class="o">.</span><span class="n">schema</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">spark_df</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
 </pre></div>
 
     </div>
@@ -13343,7 +13346,7 @@ only showing top 1 row
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>StructType(List(StructField(artist,StringType,true),StructField(auth,StringType,true),StructField(firstName,StringType,true),StructField(gender,StringType,true),StructField(itemInSession,LongType,true),StructField(lastName,StringType,true),StructField(length,DoubleType,true),StructField(level,StringType,true),StructField(location,StringType,true),StructField(method,StringType,true),StructField(page,StringType,true),StructField(registration,LongType,true),StructField(sessionId,LongType,true),StructField(song,StringType,true),StructField(status,LongType,true),StructField(ts,LongType,true),StructField(userAgent,StringType,true),StructField(userId,StringType,true)))</pre>
+<pre>286500</pre>
 </div>
 
 </div>
@@ -13351,16 +13354,6 @@ only showing top 1 row
 </div>
 </div>
 
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Exploratory-Data-Analysis">Exploratory Data Analysis<a class="anchor-link" href="#Exploratory-Data-Analysis">&#182;</a></h1><p>When you're working with the full dataset, perform EDA by loading a small subset of the data and doing basic manipulations within Spark. In this workspace, you are already provided a small subset of data you can explore.</p>
-<h3 id="Define-Churn">Define Churn<a class="anchor-link" href="#Define-Churn">&#182;</a></h3><p>Once you've done some preliminary analysis, create a column <code>Churn</code> to use as the label for your model. I suggest using the <code>Cancellation Confirmation</code> events to define your churn, which happen for both paid and free users. As a bonus task, you can also look into the <code>Downgrade</code> events.</p>
-<h3 id="Explore-Data">Explore Data<a class="anchor-link" href="#Explore-Data">&#182;</a></h3><p>Once you've defined churn, perform some exploratory data analysis to observe the behavior for users who stayed vs users who churned. You can start by exploring aggregates on these two groups of users, observing how much of a specific action they experienced per a certain time unit or number of songs played.</p>
-
-</div>
-</div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
@@ -13417,7 +13410,7 @@ only showing top 1 row
 <div class="prompt input_prompt">In&nbsp;[9]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">spark_df</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">spark_df</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s1">&#39;userId&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">())</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
 </pre></div>
 
     </div>
@@ -13436,7 +13429,7 @@ only showing top 1 row
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>286500</pre>
+<pre>0</pre>
 </div>
 
 </div>
@@ -13450,7 +13443,8 @@ only showing top 1 row
 <div class="prompt input_prompt">In&nbsp;[10]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">spark_df</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">col</span><span class="p">(</span><span class="s1">&#39;userId&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">isNull</span><span class="p">())</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># count the number of users in dataset</span>
+<span class="n">spark_df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;userId&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">dropDuplicates</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
 </pre></div>
 
     </div>
@@ -13469,40 +13463,6 @@ only showing top 1 row
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>0</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[11]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># count the number of users in dataset</span>
-<span class="n">spark_df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;userId&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">dropDuplicates</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area">
-
-    <div class="prompt output_prompt">Out[11]:</div>
-
-
-
-
-<div class="output_text output_subarea output_execute_result">
 <pre>226</pre>
 </div>
 
@@ -13514,7 +13474,7 @@ only showing top 1 row
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># display unique values of column page</span>
@@ -13572,13 +13532,10 @@ only showing top 20 rows
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Data-Transformation">Data Transformation<a class="anchor-link" href="#Data-Transformation">&#182;</a></h2><p>Data Cleaning step includes:</p>
+<h2 id="Data-Preprocessing">Data Preprocessing<a class="anchor-link" href="#Data-Preprocessing">&#182;</a></h2><p>This includes:</p>
 <ul>
-<li>rename columns</li>
-<li>convert data type</li>
-<li>remove null values</li>
-<li>drop duplicate</li>
-<li>derive new columns</li>
+<li>Data Cleaning: rename columns, convert data types, remove null values, drop duplicates</li>
+<li>Data Transformation: derive new columns</li>
 </ul>
 
 </div>
@@ -13586,7 +13543,7 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># data cleaning</span>
@@ -13600,7 +13557,7 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># convert columns ts &amp; registration to timestamp</span>
@@ -13617,7 +13574,7 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># spark_df.describe().show()</span>
@@ -13630,7 +13587,7 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">clean_df</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
@@ -13682,7 +13639,7 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">clean_df</span>
@@ -13695,7 +13652,7 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[18]:</div>
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># derive new columns: is_downgrade, is_churn</span>
@@ -13759,7 +13716,7 @@ only showing top 10 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[19]:</div>
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># gender distribution between churn users and regular users</span>
@@ -13800,7 +13757,7 @@ only showing top 10 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="prompt input_prompt">In&nbsp;[19]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># plotting a bar plot to show gender distribution between regular and churn users</span>
@@ -13818,13 +13775,13 @@ only showing top 10 rows
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[20]:</div>
+    <div class="prompt output_prompt">Out[19]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;matplotlib.axes._subplots.AxesSubplot at 0x7fbde444de80&gt;</pre>
+<pre>&lt;matplotlib.axes._subplots.AxesSubplot at 0x7f6ddd2a0a20&gt;</pre>
 </div>
 
 </div>
@@ -13850,7 +13807,7 @@ only showing top 10 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[21]:</div>
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># finding out which level customers churn more</span>
@@ -13868,13 +13825,13 @@ only showing top 10 rows
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[21]:</div>
+    <div class="prompt output_prompt">Out[20]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;matplotlib.axes._subplots.AxesSubplot at 0x7fbde4274550&gt;</pre>
+<pre>&lt;matplotlib.axes._subplots.AxesSubplot at 0x7f6ddd1c1278&gt;</pre>
 </div>
 
 </div>
@@ -13900,7 +13857,7 @@ only showing top 10 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="prompt input_prompt">In&nbsp;[21]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># gender distribution for number of songs played per session for churned and regular users</span>
@@ -13948,10 +13905,10 @@ only showing top 10 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="prompt input_prompt">In&nbsp;[22]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># </span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># graph distribution of users churned by gender</span>
 <span class="n">df_ops</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;is_churn&quot;</span><span class="p">,</span> <span class="s2">&quot;userId&quot;</span><span class="p">,</span> <span class="s2">&quot;sessionId&quot;</span><span class="p">,</span> <span class="s1">&#39;gender&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">toPandas</span><span class="p">()</span>
 <span class="n">sns</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="s1">&#39;is_churn&#39;</span><span class="p">,</span> <span class="n">orient</span> <span class="o">=</span> <span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">df_ops</span><span class="p">,</span> <span class="n">hue</span> <span class="o">=</span> <span class="s1">&#39;gender&#39;</span><span class="p">)</span>
 </pre></div>
@@ -13966,13 +13923,13 @@ only showing top 10 rows
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[23]:</div>
+    <div class="prompt output_prompt">Out[22]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>&lt;matplotlib.axes._subplots.AxesSubplot at 0x7fbde170d1d0&gt;</pre>
+<pre>&lt;matplotlib.axes._subplots.AxesSubplot at 0x7f6ddd05a278&gt;</pre>
 </div>
 
 </div>
@@ -13999,7 +13956,7 @@ only showing top 10 rows
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>From the chart, we can see that churn users performed less compared to normal users. And, femla users are more likely to churn.</p>
+<p>From the chart, we can see that churn users performed less compared to normal users. And, female users are more likely to churn.</p>
 
 </div>
 </div>
@@ -14020,10 +13977,10 @@ only showing top 10 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="prompt input_prompt">In&nbsp;[23]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># feature 1: Total number of  songs played</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># feature 1: calculate the total number of songs played</span>
 <span class="n">feature_1</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;userId&#39;</span><span class="p">,</span> <span class="s1">&#39;song&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="s1">&#39;userId&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">withColumnRenamed</span><span class="p">(</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="s1">&#39;total_songs&#39;</span><span class="p">)</span>
 <span class="n">feature_1</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
@@ -14078,10 +14035,10 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="prompt input_prompt">In&nbsp;[24]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># feature 2: the number of thumbs up</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># feature 2: calculate the number of thumbs up</span>
 <span class="n">feature_2</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;userId&#39;</span><span class="p">,</span> <span class="s1">&#39;page&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">page</span> <span class="o">==</span> <span class="s1">&#39;Thumbs Up&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="s1">&#39;userId&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">withColumnRenamed</span><span class="p">(</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="s1">&#39;total_thumbs_up&#39;</span><span class="p">)</span>
 <span class="n">feature_2</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
@@ -14136,10 +14093,10 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># feature 3: Number of thumbs down</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># feature 3: calculate the number of thumbs down</span>
 <span class="n">feature_3</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;userId&#39;</span><span class="p">,</span> <span class="s1">&#39;page&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">page</span> <span class="o">==</span> <span class="s1">&#39;Thumbs Down&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="s1">&#39;userId&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">withColumnRenamed</span><span class="p">(</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="s1">&#39;total_thumbs_down&#39;</span><span class="p">)</span>
 <span class="n">feature_3</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
@@ -14194,10 +14151,10 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[27]:</div>
+<div class="prompt input_prompt">In&nbsp;[26]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># feature 4: life time since registration</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># feature 4: calculate the life time since registration</span>
 <span class="n">feature_4</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;userId&#39;</span><span class="p">,</span> <span class="s1">&#39;registration&#39;</span><span class="p">,</span> <span class="s1">&#39;ts&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">withColumn</span><span class="p">(</span><span class="s1">&#39;total_lifetime&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">ts</span> <span class="o">-</span> <span class="n">df</span><span class="o">.</span><span class="n">registration</span><span class="p">))</span>\
     <span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="s1">&#39;userId&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">({</span><span class="s1">&#39;total_lifetime&#39;</span> <span class="p">:</span> <span class="s1">&#39;max&#39;</span><span class="p">})</span>\
     <span class="o">.</span><span class="n">withColumnRenamed</span><span class="p">(</span><span class="s1">&#39;max(total_lifetime)&#39;</span><span class="p">,</span> <span class="s1">&#39;total_lifetime&#39;</span><span class="p">)</span>\
@@ -14255,10 +14212,10 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[28]:</div>
+<div class="prompt input_prompt">In&nbsp;[27]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># feature 5: total length of listening utilizing all services</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># feature 5: calcukate the total length of listening utilizing all services</span>
 <span class="n">feature_5</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;userId&quot;</span><span class="p">,</span> <span class="s1">&#39;length&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="s1">&#39;userId&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">withColumnRenamed</span><span class="p">(</span><span class="s1">&#39;sum(length)&#39;</span><span class="p">,</span> <span class="s1">&#39;total_listen_time&#39;</span><span class="p">)</span>
 <span class="n">feature_5</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
@@ -14313,10 +14270,10 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[29]:</div>
+<div class="prompt input_prompt">In&nbsp;[28]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># feature 6: total number of friends</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># feature 6: calcualte the total number of friends</span>
 <span class="n">feature_6</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;userId&#39;</span><span class="p">,</span> <span class="s1">&#39;page&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">page</span> <span class="o">==</span> <span class="s1">&#39;Add Friend&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">groupBy</span><span class="p">(</span><span class="s1">&#39;userId&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">withColumnRenamed</span><span class="p">(</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="s1">&#39;total_friends&#39;</span><span class="p">)</span>
 <span class="n">feature_6</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
@@ -14371,7 +14328,7 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[30]:</div>
+<div class="prompt input_prompt">In&nbsp;[29]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># feature 7: gender of the user</span>
@@ -14431,10 +14388,10 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="prompt input_prompt">In&nbsp;[30]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># feature 8: total number of songs listened per session</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># feature 8: calculate the total number of songs listened per session</span>
 <span class="n">feature_8</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">&#39;page == &quot;NextSong&quot;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">&#39;userId&#39;</span><span class="p">,</span> <span class="s1">&#39;sessionId&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">count</span><span class="p">()</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;userId&#39;</span><span class="p">)</span>\
           <span class="o">.</span><span class="n">agg</span><span class="p">({</span><span class="s1">&#39;count&#39;</span> <span class="p">:</span> <span class="s1">&#39;avg&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">withColumnRenamed</span><span class="p">(</span><span class="s1">&#39;avg(count)&#39;</span><span class="p">,</span> <span class="s1">&#39;avg_played_songs&#39;</span><span class="p">)</span>
 
@@ -14491,10 +14448,10 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[32]:</div>
+<div class="prompt input_prompt">In&nbsp;[31]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># feature 9: Total number of artists the user has listened to</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># feature 9: calculate the total number of artists the user has listened to</span>
 <span class="n">feature_9</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">page</span> <span class="o">==</span> <span class="s2">&quot;NextSong&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s2">&quot;userId&quot;</span><span class="p">,</span> <span class="s2">&quot;artist&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">dropDuplicates</span><span class="p">()</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;userId&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>\
          <span class="o">.</span><span class="n">withColumnRenamed</span><span class="p">(</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;total_artist_listened&quot;</span><span class="p">)</span>
 <span class="n">feature_9</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -14550,7 +14507,7 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[33]:</div>
+<div class="prompt input_prompt">In&nbsp;[32]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># setting the churn label for our model</span>
@@ -14608,10 +14565,10 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[34]:</div>
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># combining all features with the churn label</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># combine all features with the churn label</span>
 <span class="n">df_features</span> <span class="o">=</span> <span class="n">feature_1</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">feature_2</span><span class="p">,</span> <span class="s1">&#39;userId&#39;</span><span class="p">,</span> <span class="s1">&#39;inner&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">feature_3</span><span class="p">,</span> <span class="s1">&#39;userId&#39;</span><span class="p">,</span> <span class="s1">&#39;inner&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">feature_4</span><span class="p">,</span> <span class="s1">&#39;userId&#39;</span><span class="p">,</span> <span class="s1">&#39;inner&#39;</span><span class="p">)</span>\
              <span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">feature_5</span><span class="p">,</span> <span class="s1">&#39;userId&#39;</span><span class="p">,</span> <span class="s1">&#39;inner&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">feature_6</span><span class="p">,</span> <span class="s1">&#39;userId&#39;</span><span class="p">,</span> <span class="s1">&#39;inner&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">feature_7</span><span class="p">,</span> <span class="s1">&#39;userId&#39;</span><span class="p">,</span> <span class="s1">&#39;inner&#39;</span><span class="p">)</span>\
              <span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">feature_8</span><span class="p">,</span> <span class="s1">&#39;userId&#39;</span><span class="p">,</span> <span class="s1">&#39;inner&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">feature_9</span><span class="p">,</span> <span class="s1">&#39;userId&#39;</span><span class="p">,</span> <span class="s1">&#39;inner&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">df_label</span><span class="p">,</span> <span class="s1">&#39;userId&#39;</span><span class="p">,</span> <span class="s1">&#39;inner&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;userId&#39;</span><span class="p">)</span>
@@ -14669,7 +14626,7 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="prompt input_prompt">In&nbsp;[34]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">df_features</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
@@ -14719,11 +14676,10 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[36]:</div>
+<div class="prompt input_prompt">In&nbsp;[35]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># step 1: vectorize all the features</span>
-<span class="c1"># refer to the sample of Data Engineering handbook by Databricks</span>
 
 <span class="n">input_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;total_songs&#39;</span><span class="p">,</span> <span class="s1">&#39;total_thumbs_up&#39;</span><span class="p">,</span> <span class="s1">&#39;total_thumbs_down&#39;</span><span class="p">,</span> <span class="s1">&#39;total_lifetime&#39;</span><span class="p">,</span> <span class="s1">&#39;total_listen_time&#39;</span><span class="p">,</span> <span class="s1">&#39;total_friends&#39;</span><span class="p">,</span> <span class="s1">&#39;gender&#39;</span><span class="p">,</span> <span class="s1">&#39;avg_played_songs&#39;</span><span class="p">,</span> <span class="s1">&#39;total_artist_listened&#39;</span><span class="p">]</span>
 <span class="n">assmblr</span> <span class="o">=</span> <span class="n">VectorAssembler</span><span class="p">(</span><span class="n">inputCols</span> <span class="o">=</span> <span class="n">input_cols</span><span class="p">,</span> <span class="n">outputCol</span> <span class="o">=</span> <span class="s2">&quot;VectFeatures&quot;</span><span class="p">)</span>
@@ -14781,7 +14737,7 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[37]:</div>
+<div class="prompt input_prompt">In&nbsp;[36]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">final_df</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
@@ -14824,7 +14780,7 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[38]:</div>
+<div class="prompt input_prompt">In&nbsp;[37]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># step 2: standardize all input features</span>
@@ -14840,7 +14796,7 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[39]:</div>
+<div class="prompt input_prompt">In&nbsp;[38]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">final_df</span><span class="o">.</span><span class="n">printSchema</span><span class="p">()</span>
@@ -14884,7 +14840,7 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="prompt input_prompt">In&nbsp;[39]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">final_df</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">final_df</span><span class="o">.</span><span class="n">is_churn</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">),</span> <span class="n">final_df</span><span class="o">.</span><span class="n">newFeatures</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="s2">&quot;features&quot;</span><span class="p">))</span>
@@ -14897,7 +14853,7 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[41]:</div>
+<div class="prompt input_prompt">In&nbsp;[40]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">data</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -14953,7 +14909,7 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[42]:</div>
+<div class="prompt input_prompt">In&nbsp;[41]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># define training set and valuation set</span>
@@ -14968,7 +14924,7 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[43]:</div>
+<div class="prompt input_prompt">In&nbsp;[42]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># try the first classifier: Random Forest </span>
@@ -14987,7 +14943,7 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[44]:</div>
+<div class="prompt input_prompt">In&nbsp;[43]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># evaluate on training set</span>
@@ -15005,13 +14961,13 @@ only showing top 20 rows
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[44]:</div>
+    <div class="prompt output_prompt">Out[43]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[0.7946966511201162]</pre>
+<pre>[0.7508242500405957]</pre>
 </div>
 
 </div>
@@ -15022,7 +14978,7 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[45]:</div>
+<div class="prompt input_prompt">In&nbsp;[44]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># evaluate on valuation set</span>
@@ -15036,14 +14992,14 @@ only showing top 20 rows
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[46]:</div>
+<div class="prompt input_prompt">In&nbsp;[62]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># evaluation metrics for Random Forest</span>
 <span class="n">evaluator</span> <span class="o">=</span> <span class="n">MulticlassClassificationEvaluator</span><span class="p">(</span><span class="n">predictionCol</span> <span class="o">=</span> <span class="s2">&quot;prediction&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The metrics for Random Forest Classifier are as follows :&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The F-1 Score is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">res_rf</span><span class="p">,</span> <span class="p">{</span><span class="n">evaluator</span><span class="o">.</span><span class="n">metricName</span> <span class="p">:</span> <span class="s2">&quot;accuracy&quot;</span><span class="p">})))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The accuracy is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">res_rf</span><span class="p">,</span> <span class="p">{</span><span class="n">evaluator</span><span class="o">.</span><span class="n">metricName</span> <span class="p">:</span> <span class="s2">&quot;f1&quot;</span><span class="p">})))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The F-1 Score is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">res_rf</span><span class="p">,</span> <span class="p">{</span><span class="n">evaluator</span><span class="o">.</span><span class="n">metricName</span> <span class="p">:</span> <span class="s2">&quot;f1&quot;</span><span class="p">})))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The accuracy is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">res_rf</span><span class="p">,</span> <span class="p">{</span><span class="n">evaluator</span><span class="o">.</span><span class="n">metricName</span> <span class="p">:</span> <span class="s2">&quot;accuracy&quot;</span><span class="p">})))</span>
 </pre></div>
 
     </div>
@@ -15061,8 +15017,8 @@ only showing top 20 rows
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>The metrics for Random Forest Classifier are as follows :
-The F-1 Score is 0.8
-The accuracy is 0.7809523809523808
+The F-1 Score is 0.7809523809523808
+The accuracy is 0.8
 </pre>
 </div>
 </div>
@@ -15073,7 +15029,7 @@ The accuracy is 0.7809523809523808
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[47]:</div>
+<div class="prompt input_prompt">In&nbsp;[46]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># try the second classifier 2: Support Vector Machine</span>
@@ -15092,7 +15048,7 @@ The accuracy is 0.7809523809523808
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[48]:</div>
+<div class="prompt input_prompt">In&nbsp;[47]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cv_model_svm</span> <span class="o">=</span> <span class="n">cross_val_svm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
@@ -15109,13 +15065,13 @@ The accuracy is 0.7809523809523808
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[48]:</div>
+    <div class="prompt output_prompt">Out[47]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[0.6980340622371741]</pre>
+<pre>[0.7015856802373657]</pre>
 </div>
 
 </div>
@@ -15126,7 +15082,7 @@ The accuracy is 0.7809523809523808
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[49]:</div>
+<div class="prompt input_prompt">In&nbsp;[48]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">res_svm</span> <span class="o">=</span> <span class="n">cv_model_svm</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
@@ -15139,14 +15095,14 @@ The accuracy is 0.7809523809523808
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[50]:</div>
+<div class="prompt input_prompt">In&nbsp;[63]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># evaluation metrics for SVM</span>
 <span class="n">evaluator</span> <span class="o">=</span> <span class="n">MulticlassClassificationEvaluator</span><span class="p">(</span><span class="n">predictionCol</span> <span class="o">=</span> <span class="s2">&quot;prediction&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The metrics for Support Vector Machine classifier are as follows: &quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The F-1 Score is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">res_svm</span><span class="p">,</span> <span class="p">{</span><span class="n">evaluator</span><span class="o">.</span><span class="n">metricName</span> <span class="p">:</span> <span class="s2">&quot;accuracy&quot;</span><span class="p">})))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The accuracy is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">res_svm</span><span class="p">,</span> <span class="p">{</span><span class="n">evaluator</span><span class="o">.</span><span class="n">metricName</span> <span class="p">:</span> <span class="s2">&quot;f1&quot;</span><span class="p">})))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The F-1 Score is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">res_svm</span><span class="p">,</span> <span class="p">{</span><span class="n">evaluator</span><span class="o">.</span><span class="n">metricName</span> <span class="p">:</span> <span class="s2">&quot;f1&quot;</span><span class="p">})))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The accuracy is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">res_svm</span><span class="p">,</span> <span class="p">{</span><span class="n">evaluator</span><span class="o">.</span><span class="n">metricName</span> <span class="p">:</span> <span class="s2">&quot;accuracy&quot;</span><span class="p">})))</span>
 </pre></div>
 
     </div>
@@ -15164,8 +15120,8 @@ The accuracy is 0.7809523809523808
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>The metrics for Support Vector Machine classifier are as follows: 
-The F-1 Score is 0.6
-The accuracy is 0.44999999999999996
+The F-1 Score is 0.44999999999999996
+The accuracy is 0.6
 </pre>
 </div>
 </div>
@@ -15176,7 +15132,7 @@ The accuracy is 0.44999999999999996
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[51]:</div>
+<div class="prompt input_prompt">In&nbsp;[50]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># try the third classifier: Gradient Boosted Trees</span>
@@ -15195,7 +15151,7 @@ The accuracy is 0.44999999999999996
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[52]:</div>
+<div class="prompt input_prompt">In&nbsp;[51]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cv_model_gbt</span> <span class="o">=</span> <span class="n">cross_val_gbt</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
@@ -15212,13 +15168,13 @@ The accuracy is 0.44999999999999996
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[52]:</div>
+    <div class="prompt output_prompt">Out[51]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[0.7201223361665434]</pre>
+<pre>[0.6864907971464512]</pre>
 </div>
 
 </div>
@@ -15229,7 +15185,7 @@ The accuracy is 0.44999999999999996
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[53]:</div>
+<div class="prompt input_prompt">In&nbsp;[52]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">res_gbt</span> <span class="o">=</span> <span class="n">cv_model_gbt</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
@@ -15242,14 +15198,14 @@ The accuracy is 0.44999999999999996
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[54]:</div>
+<div class="prompt input_prompt">In&nbsp;[64]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># evaluation metrics for Gradient Boosted Trees</span>
 <span class="n">evaluator</span> <span class="o">=</span> <span class="n">MulticlassClassificationEvaluator</span><span class="p">(</span><span class="n">predictionCol</span> <span class="o">=</span> <span class="s2">&quot;prediction&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The metrics for our Gradient Boosted Trees Classifier are as follows: &quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The F-1 Score is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">res_gbt</span><span class="p">,</span> <span class="p">{</span><span class="n">evaluator</span><span class="o">.</span><span class="n">metricName</span> <span class="p">:</span> <span class="s2">&quot;accuracy&quot;</span><span class="p">})))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The accuracy is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">res_gbt</span><span class="p">,</span> <span class="p">{</span><span class="n">evaluator</span><span class="o">.</span><span class="n">metricName</span> <span class="p">:</span> <span class="s2">&quot;f1&quot;</span><span class="p">})))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The F-1 Score is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">res_gbt</span><span class="p">,</span> <span class="p">{</span><span class="n">evaluator</span><span class="o">.</span><span class="n">metricName</span> <span class="p">:</span> <span class="s2">&quot;f1&quot;</span><span class="p">})))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The accuracy is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">res_gbt</span><span class="p">,</span> <span class="p">{</span><span class="n">evaluator</span><span class="o">.</span><span class="n">metricName</span> <span class="p">:</span> <span class="s2">&quot;accuracy&quot;</span><span class="p">})))</span>
 </pre></div>
 
     </div>
@@ -15267,8 +15223,8 @@ The accuracy is 0.44999999999999996
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>The metrics for our Gradient Boosted Trees Classifier are as follows: 
-The F-1 Score is 0.8
-The accuracy is 0.7809523809523808
+The F-1 Score is 0.7809523809523808
+The accuracy is 0.8
 </pre>
 </div>
 </div>
@@ -15280,15 +15236,22 @@ The accuracy is 0.7809523809523808
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Selecting-the-classifier">Selecting the classifier<a class="anchor-link" href="#Selecting-the-classifier">&#182;</a></h3><p>Comparing the F-1 score and accuracy of the three classifier, we see that Gradient Boosted Trees - GBT has the highest score.
+<h3 id="Selecting-the-classifier">Selecting the classifier<a class="anchor-link" href="#Selecting-the-classifier">&#182;</a></h3><p>Comparing the F-1 score and accuracy of the three classifiers, we see that Gradient Boosted Trees - GBT has the highest score.
 I will select this classifier for the next step: Tuning model</p>
 
 </div>
 </div>
 </div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Tuning-Hyperparameters">Tuning Hyperparameters<a class="anchor-link" href="#Tuning-Hyperparameters">&#182;</a></h3>
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[55]:</div>
+<div class="prompt input_prompt">In&nbsp;[54]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Tuning Hyperparameters for the Gradient Boosting Trees model using Grid Search</span>
@@ -15309,7 +15272,7 @@ I will select this classifier for the next step: Tuning model</p>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[56]:</div>
+<div class="prompt input_prompt">In&nbsp;[55]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">cv_model_gbt</span> <span class="o">=</span> <span class="n">cross_val_gbt</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
@@ -15326,18 +15289,18 @@ I will select this classifier for the next step: Tuning model</p>
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[56]:</div>
+    <div class="prompt output_prompt">Out[55]:</div>
 
 
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>[0.7383248330274956,
- 0.7201223361665434,
- 0.738425531201502,
- 0.7201223361665434,
- 0.746153658337524,
- 0.7201223361665434]</pre>
+<pre>[0.6982776939311534,
+ 0.6864907971464512,
+ 0.7022407733199691,
+ 0.6864907971464512,
+ 0.7061527660872282,
+ 0.6864907971464512]</pre>
 </div>
 
 </div>
@@ -15348,7 +15311,7 @@ I will select this classifier for the next step: Tuning model</p>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[57]:</div>
+<div class="prompt input_prompt">In&nbsp;[60]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># choosing the parameters with best metrics</span>
@@ -15364,14 +15327,14 @@ I will select this classifier for the next step: Tuning model</p>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[58]:</div>
+<div class="prompt input_prompt">In&nbsp;[61]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Gettting the final evaluation metrics for Gradient Boosted Trees</span>
 <span class="n">evaluator</span> <span class="o">=</span> <span class="n">MulticlassClassificationEvaluator</span><span class="p">(</span><span class="n">predictionCol</span> <span class="o">=</span> <span class="s2">&quot;prediction&quot;</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The final metrics for our Gradient Boosted Trees Classifier are as follows: &quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The F-1 Score is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">res_gbt</span><span class="p">,</span> <span class="p">{</span><span class="n">evaluator</span><span class="o">.</span><span class="n">metricName</span> <span class="p">:</span> <span class="s2">&quot;accuracy&quot;</span><span class="p">})))</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The accuracy is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">res_gbt</span><span class="p">,</span> <span class="p">{</span><span class="n">evaluator</span><span class="o">.</span><span class="n">metricName</span> <span class="p">:</span> <span class="s2">&quot;f1&quot;</span><span class="p">})))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The F-1 Score is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">res_final</span><span class="p">,</span> <span class="p">{</span><span class="n">evaluator</span><span class="o">.</span><span class="n">metricName</span> <span class="p">:</span> <span class="s2">&quot;f1&quot;</span><span class="p">})))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The accuracy is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">res_final</span><span class="p">,</span> <span class="p">{</span><span class="n">evaluator</span><span class="o">.</span><span class="n">metricName</span> <span class="p">:</span> <span class="s2">&quot;accuracy&quot;</span><span class="p">})))</span>
 </pre></div>
 
     </div>
@@ -15389,8 +15352,8 @@ I will select this classifier for the next step: Tuning model</p>
 
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>The final metrics for our Gradient Boosted Trees Classifier are as follows: 
-The F-1 Score is 0.8
-The accuracy is 0.7809523809523808
+The F-1 Score is 0.7809523809523808
+The accuracy is 0.8
 </pre>
 </div>
 </div>
@@ -15425,6 +15388,7 @@ The accuracy is 0.7809523809523808
 <div class="text_cell_render border-box-sizing rendered_html">
 <h1 id="References">References<a class="anchor-link" href="#References">&#182;</a></h1><ol>
 <li><a href="https://spark.apache.org/docs/latest/api/python/pyspark.sql.html">Apache Spark</a></li>
+<li>Data Scientists Guide to Apache Spark, databricks</li>
 </ol>
 
 </div>
